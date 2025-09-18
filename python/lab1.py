@@ -7,15 +7,15 @@
 # Вы можете вернуть ответ в любом порядке нахождения индексов.
 
 def f(a, target):
-    enum_a = [(x, i) for (i, x) in enumerate(a)]
-    enum_a.sort()
+    aa = [(x, indx) for (indx, x) in enumerate(a)]
+    aa.sort()
 
     j = len(a) - 1
-    for (x, i) in enum_a:
-        while( i < j and x + a[j] > target ): j -= 1
+    for i, (x, indx) in enumerate(aa):
+        while( i < j and x + aa[j][0] > target ): j -= 1
 
         if( i == j ): break
-        if( x + a[j] == target ): return [i, j]
+        if( x + aa[j][0] == target ): return [indx, aa[j][1]]
 
     return []
 
@@ -26,3 +26,5 @@ print( f([3, 3], 6) )          # Output: [0, 1]
 print( f([3, 3], 3) )          # Output: []
 print( f([3], 3) )             # Output: []
 print( f([ ], 3) )             # Output: []
+
+# можно оттестировать здесь: https://leetcode.com/problems/two-sum/description/
