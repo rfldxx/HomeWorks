@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Обработка URL</title>
-</head>
-<body>
-    <h1>Обработка числа из URL</h1>
-    <p>Число из URL будет отображено в заголовке окна браузера</p>
+  <body>
+    <h4>rfldxx</h4>
 
     <script>
-        const number = window.location.search.substring(1);
-        
-            throw new Error("need a number!");
-        // if ( isNaN(number) ) {
-        // }
-        
-        document.title = number;
-        console.log('Число из URL: {number}');
-    </script>
+      const A = window.location.search.substring(1);
 
-    
-</body>
+      console.log('Число из URL: {A}');
+
+      let sum = 0;
+      for (let a = 2; a <= A; a++) {
+        let ok = 1;
+        for (let d = 2; d * d <= a; d++) {
+          if (a % d == 0) ok = 0;
+        }
+        sum = sum + ok;
+      }
+      document.title = sum;
+    </script>
+  </body>
 </html>
