@@ -12,9 +12,9 @@
     <script>
         const number = window.location.search.substring(1);
         
-        if ( isNaN(number) ) {
             throw new Error("need a number!");
-        }
+        // if ( isNaN(number) ) {
+        // }
         
         document.title = number;
         console.log('Число из URL: {number}');
