@@ -12,7 +12,7 @@
     <script>
         const number = window.location.search.substring(1);
         
-        if (!number) {
+        if ( isNaN(number) ) {
             throw new Error("need a number!");
         }
         
