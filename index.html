@@ -10,16 +10,13 @@
     <p>Число из URL будет отображено в заголовке окна браузера</p>
 
     <script>
-        // Получаем текущий URL
-        const currentUrl = window.location.href;
+        const number = window.location.search().substr(1);
+
         
-        // Ищем вопросительный знак и число после него
-        const match = currentUrl.match(/\?(\d+)$/);
-        
-        if (match && match[1]) {
+        if (number) {
             // Устанавливаем число в качестве заголовка окна
-            document.title = match[1];
-            console.log('Число из URL:', match[1]);
+            document.title = number;
+            console.log('Число из URL: {number}');
         } else {
             console.log('В URL нет числа после вопросительного знака');
             document.title = 'Число не найдено';
