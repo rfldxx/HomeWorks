@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обработка URL</title>
+</head>
+<body>
+    <h1>Обработка числа из URL</h1>
+    <p>Число из URL будет отображено в заголовке окна браузера</p>
+
+    <script>
+        // Получаем текущий URL
+        const currentUrl = window.location.href;
+        
+        // Ищем вопросительный знак и число после него
+        const match = currentUrl.match(/\?(\d+)$/);
+        
+        if (match && match[1]) {
+            // Устанавливаем число в качестве заголовка окна
+            document.title = match[1];
+            console.log('Число из URL:', match[1]);
+        } else {
+            console.log('В URL нет числа после вопросительного знака');
+            document.title = 'Число не найдено';
+        }
+    </script>
+</body>
+</html>
