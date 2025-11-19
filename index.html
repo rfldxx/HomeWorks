@@ -4,19 +4,10 @@
     <h4>rfldxx</h4>
 
     <script>
-      const A = window.location.search.substring(1);
+      let str = window.location.search.substring(2);
+      let A = str.substring(0, str.length - 1).split(',');
 
-      console.log('Число из URL: {A}');
-
-      let sum = 0;
-      for (let a = 2; a <= A; a++) {
-        let ok = 1;
-        for (let d = 2; d * d <= a; d++) {
-          if (a % d == 0) ok = 0;
-        }
-        sum = sum + ok;
-      }
-      document.title = sum;
+      document.title = A.sort((x, y) => Number(x) - Number(y)).toString();
     </script>
   </body>
 </html>
