@@ -10,8 +10,7 @@
 # Вы можете вернуть ответ в любом порядке нахождения индексов.
 
 def f(a, target):
-    aa = [(x, indx) for (indx, x) in enumerate(a)]
-    aa.sort()
+    aa = sorted( (x, indx) for (indx, x) in enumerate(a) )
 
     j = len(a) - 1
     for i, (x, indx) in enumerate(aa):
