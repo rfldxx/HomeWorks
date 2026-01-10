@@ -12,7 +12,7 @@
 def f(a, target):
     aa = sorted( (x, indx) for (indx, x) in enumerate(a) )
 
-    j = len(a) - 1
+    j = len(aa) - 1
     for i, (x, indx) in enumerate(aa):
         while( i < j and x + aa[j][0] > target ): j -= 1
 
