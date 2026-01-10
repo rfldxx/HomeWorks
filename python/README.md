@@ -84,10 +84,89 @@ Callable[[int], bool]
 ### Решение
 Вообще забавно:
 ```py
-def buid_tree(h, r, f, g):
-    return { r : [buid_tree(h-1, f(r), f, g),
-                  buid_tree(h-1, g(r), f, g)] if h else [] }
+def gen_bin_tree(h, r, f, g):
+    return { r : [gen_bin_tree(h-1, F(r), f, g) for F in [f, g]] if h > 0 else [] }
 
-# h = 3 : 
-# {1: [{2: [{3: [{4: []}, {6: []}]}, {4: [{5: []}, {8: []}]}]}, {2: [{3: [{4: []}, {6: []}]}, {4: [{5: []}, {8: []}]}]}]}
+# gen_bin_tree(2, 1, lambda x: x+1, lambda y: y*3) :
+# {1: 
+#     [{2: 
+#         [{3: []}, 
+#          {6: []}]}, 
+#      {3: 
+#         [{4: []}, 
+#          {9: []}]}]}
 ```
+
+Так как узел дерева представляет собой `Dict` (неупорядоченноe множество), то как нам обращаться к его единственному элементу? Можно так:
+```py
+(root_value, subTrees), = Tree.items()
+```
+Запятая после `(key, value)` говорит: "распаковать первый элемент последовательности" (спасибо бесплатный deepseek).
+
+новые типы: Any
+
+
+
+Так как сама задача получилось достаточно маленькая, то решено упороться в генераторы в тестировании:
+
+- Функция с состоянием
+    ```py
+    def newCounter():
+        cnt = 0
+        def f():
+            nonlocal cnt
+            cnt += 1  # ужас, в питоне нельзя делать return ++cnt
+            return cnt
+        return f
+    ```
+
+- Создание функций в цикле:
+    ```py
+    def GenF(i):
+        def new_f(x): return (i+1)*x
+        return new_f
+    
+    functions = [GenF(i) for i in range(3)]
+    ```
+
+    <details>
+    
+    <summary> осторожно ловушка! </summary>
+
+    Изначально тут было написано:
+    ```py
+    functions = []
+
+    for i in range(3):
+        def new_f(x): return (i+1)*x
+        functions.append(new_f)
+    ```
+
+    И это верно работало при вызове в цикле:
+    ```py
+    for i in range(3):
+        print( functions[i](5) )
+    #  5
+    # 10
+    # 15
+    ```
+    Однако если захочется повызывать по элементно, то:
+    ```py
+    print( functions[0](5) )  #  15
+    print( functions[1](5) )  #  15
+    print( functions[2](5) )  #  15
+    ```
+    Оказывается все эти функции будут смотреть именно на переменную $i$ в "общем пространстве"! 
+
+    </details>
+
+
+- Также в этот раз тестирование реально помогало найти ошибки (правда ошибки были в реализации самих тестов...). Удобным оказалось, что в `self.assert`-ы можно передовать дополнительный аргумент - сообщение в случае ошибки. И при реккурсивном вызове `assert`-а, можно таскать с собой путь:
+    ```py
+    def recurseve_check(..., path = ""):
+        ...
+        self.assertEqual(root_value, expected_value, "Error in position:" + path)
+            
+        for i in range(len(subTree)):
+            recurseve_check(..., path + " " + ("LR"[i]))
+    ```
