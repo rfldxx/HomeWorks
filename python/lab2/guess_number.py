@@ -65,3 +65,4 @@ def guess_number(target : int, lst : List[int], type : str = 'seq') -> Tuple[int
         cnt += 1
 
     return sorted_lst[l], cnt
+
