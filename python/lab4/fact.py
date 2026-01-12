@@ -1,63 +1,74 @@
 # Battle Royale
-
-from operator import ipow
 # Battle Royale факториалов
+
+import sys
+
+# изменение глубины рекурсии
+sys.setrecursionlimit(50000)
+
+# изменения max размера длинной арифметики
+sys.set_int_max_str_digits(100000) 
+
 
 def fact_recursive(n):
     return n * fact_recursive(n-1) if n > 1 else 1
 
   
 def fact_classic(n):
-    r = 1
+    fact = 1
     for x in range(1, n+1):
-        r *= x
-    return r
+        fact *= x
+    return fact
 
-# from random import shuffle
-def fact_classic_1(n):
-    r = 1
-    A = list(range(1, n+1))
-    A.append(1) # для удобства
-    # shuffle(A)
-    # print(n, A)
+
+def adjacent_pair_merging(A):
+    n = len(A)
+    A.append(1)
     while n > 1:
-        if( n%2 ): 
-            A[n] = 1
-            n += 1
-        for i in range(n//2):
+        A[n] = 1
+        n = (n+1)//2
+        for i in range(n):
             A[i] = A[2*i]*A[2*i+1]
-        n = n//2
-    return A[0]
+    return  A[0]
+
+
+from random import shuffle
+def fact_classic_1(n, pre_shuffle=1):
+    A = list(range(1, n+1))
+    if( pre_shuffle ): shuffle(A)
+    return adjacent_pair_merging(A)
 
 
 
 from math import inf
 from collections import deque
 
+# я слышал, что для ускорения вычислений, лучше перемножать максимально близкие по размеру числа
+
 def fact3(n):
     # грубое разделение на две области:
     #    значения порядка ~x
     #    значения порядка ~x^2 и более
 
-    A = deque()
-    B = list(range(n, 0, -1))
+    A = deque()               # в возрастающем порядке
+    B = list(range(n, 0, -1)) # в убыващем порядке
     B.insert(0, inf) # чтобы проще c if-ами было
-
-    # print(B)
 
     for iteration in range(n-1):
         while( len(A) < 2 ):  A.append( B.pop() )
 
-        new_mlt = A.popleft()  * A.popleft() 
+        new_mlt = A.popleft() * A.popleft() 
 
         while( B[-1] < new_mlt ): A.append( B.pop() )
 
         B.append(new_mlt)
 
-
     return B[-1]
 
+
+
 def fact3_1(n):
+    # Как fact3, только вместо самих чисел, сравниваются их логарифмы
     A = deque()
     B = [(x, x.bit_length()) for x in range(n, 0, -1)]
     B.insert(0, (inf, inf)) # чтобы проще c if-ами было
@@ -76,15 +87,13 @@ def fact3_1(n):
 
 
 
-def fact4(n, f):
-    # грубое разделение на две области:
+def fact3_2(n, f):
+    # Как fact3_1, только сравнивается не с ln, а с f(ln)
     #    значения порядка ~x
     #    значения порядка ~f(x) и более
     A = deque()
     B = [(x, x.bit_length()) for x in range(n, 0, -1)]
     B.insert(0, (inf, inf)) # чтобы проще c if-ами было
-
-    # print(B)
 
     for iteration in range(n-1):
         while( len(A) < 2 ):  A.append( B.pop() )
@@ -105,6 +114,8 @@ def fact4(n, f):
 
 import heapq
 def fact5(n):
+    # Достаем два наименьших числа и возвращаемрезультат их произведения (!а что если читывать повторения чисел!)
+
     heap = [x for x in range(1, n+1)]
     heapq.heapify(heap)
 
@@ -115,6 +126,9 @@ def fact5(n):
 
 
 def fact6(n):
+    # Расматривается разложение n! на просте числа
+    # Для каждого простого числа находится частота его вхождения и возведение в эту степень с помощью быстого возведения встепень
+    # Затем последовательно перемножение степеней простых чисел
     sieve = [0]*(n+1)
     pc = []
     for x in range(2, n):
@@ -140,6 +154,7 @@ def fact6(n):
 
 
 def fact6_1(n):
+    # Подобно fact6, только сначала перемножаем все простые числа которые входят одинаковое число раз и потом возводим это произведение в нужную степень.
     sieve = [0]*(n+1)
 
     L = 0
@@ -157,21 +172,9 @@ def fact6_1(n):
         pc[cnt].append(x)
 
     heap = []
-    i = 0
     for (k, A) in enumerate(pc):
-          if A == []: continue
-          l = len(A)
-          A.append(1)
-          while l > 1:
-              if( l%2 ): 
-                  A[l] = 1
-                  l += 1
-              for i in range(l//2):
-                  A[i] = A[2*i]*A[2*i+1]
-              l = l//2
-
-          heap.append( pow(A[0], k) )
-          i += 1
+        if A != []:
+            heap.append( pow(adjacent_pair_merging(A), k) )
 
     heapq.heapify(heap)
     L = len(heap)
@@ -183,7 +186,8 @@ def fact6_1(n):
 
 
 
- 
+
+
 
 import timeit
 def check(f, n, num_runs = 100):
@@ -192,7 +196,11 @@ def check(f, n, num_runs = 100):
 
 from functools import partial
 
+from math import factorial
+
 a = 20000
+check(factorial, a)                          № t = 0.011106155490015226 for val 20000
+
 check(fact_recursive, a)                     # t = 0.11220435719000306  for val 20000
 
 check(fact_classic, a)                       # t = 0.10875383063999834  for val 20000
