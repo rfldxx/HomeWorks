@@ -148,9 +148,9 @@ def fact6(n, merging = min_pair_merging):
     # Затем последовательно перемножение степеней простых чисел
     sieve = [0]*(n+1)
     pc = []
-    for x in range(2, n):
+    for x in range(2, n+1):
         if sieve[x]: continue
-        for y in range(x*x, n, x):
+        for y in range(x*x, n+1, x):
             sieve[y] = 1
         cnt = 0
         c = n
