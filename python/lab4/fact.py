@@ -4,7 +4,7 @@ from operator import ipow
 # Battle Royale факториалов
 
 def fact_recursive(n):
-    return fact_recursive(n-1) + fact_recursive(n-2)
+    return n * fact_recursive(n-1) if n > 1 else 1
 
   
 def fact_classic(n):
@@ -193,6 +193,8 @@ def check(f, n, num_runs = 100):
 from functools import partial
 
 a = 20000
+check(fact_recursive, a)                     # t = 0.11220435719000306  for val 20000
+
 check(fact_classic, a)                       # t = 0.10875383063999834  for val 20000
 check(fact_classic_1, a)                     # t = 0.01967309137000484  for val 20000
 
