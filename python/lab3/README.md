@@ -32,14 +32,14 @@ def gen_bin_tree(h, r, f, g):
 Более подробно про функции расписано в документации к коду (там она вроде очень хорошая получилась).
 
 Также в этот раз тестирование реально помогало найти ошибки (правда ошибки были в реализации самих тестов...). Удобным оказалось, что в `self.assert`-ы можно передавать дополнительный аргумент - сообщение в случае ошибки. И при реккурсивном вызове `assert`-а, можно таскать с собой путь:
-    ```py
-    def recurseve_check(..., path = ""):
-        ...
-        self.assertEqual(root_value, expected_value, "Error in position:" + path)
-            
-        for i in range(len(subTrees)):
-            recurseve_check(..., path + " " + ("LR"[i]))
-    ```
+```py
+def recurseve_check(..., path = ""):
+    ...
+    self.assertEqual(root_value, expected_value, "Error in position:" + path)
+        
+    for i in range(len(subTrees)):
+        recurseve_check(..., path + " " + ("LR"[i]))
+```
 
 ### Заметки
 
