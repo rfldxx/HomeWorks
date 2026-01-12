@@ -3,15 +3,14 @@
 import sys
 
 # изменение глубины рекурсии
-sys.setrecursionlimit(50000)
+sys.setrecursionlimit(100000)
 
 # изменения max размера длинной арифметики
-sys.set_int_max_str_digits(100000) 
+sys.set_int_max_str_digits(100000)
 
 
 def fact_recursive(n):
     return n * fact_recursive(n-1) if n > 1 else 1
-
 
 def first_pair_merging(A):
     result = 1
@@ -33,10 +32,11 @@ def adjacent_pair_merging(A):
             A[i] = A[2*i]*A[2*i+1]
     return  A[0]
 
+
 import heapq
 def min_pair_merging(A):
     if( not isinstance(A, list) ): A = list(A)
-    
+
     n = len(A)
     heapq.heapify(A)
 
@@ -45,6 +45,8 @@ def min_pair_merging(A):
         heapq.heappush(A, mlt)
     return A[0]
 
+
+# Ещё бы попробывать эти "сверкти" захардкодить в функции и сравнить производительность
 
 
 def fact_classic(n, merging = first_pair_merging):
@@ -57,7 +59,7 @@ def fact_classic(n, merging = first_pair_merging):
 
 
 from random import shuffle
-def fact_classic_1(n, pre_shuffle=1, merging = first_pair_merging):
+def fact_classic_1(n, pre_shuffle=1, merging = adjacent_pair_merging):
     A = list(range(1, n+1))
     if( pre_shuffle ): shuffle(A)
     return merging(A)
@@ -79,7 +81,7 @@ def fact3(n):
     for iteration in range(n-1):
         while( len(A) < 2 ):  A.append( B.pop() )
 
-        new_mlt = A.popleft() * A.popleft() 
+        new_mlt = A.popleft() * A.popleft()
 
         while( B[-1] < new_mlt ): A.append( B.pop() )
 
@@ -155,7 +157,7 @@ def fact6(n, merging = min_pair_merging):
         while c:
           c  //= x
           cnt += c
-        
+
         pc.append((x,cnt))
 
     return min_pair_merging( pow(x, c) for (x,c) in pc )
@@ -169,14 +171,14 @@ def fact6_1(n, merging = min_pair_merging, merging_in_blocks = adjacent_pair_mer
     pc = [[] for _ in range(n+1)]
     for x in range(2, n+1):
         if sieve[x]: continue
-        for y in range(x*x, n, x):
+        for y in range(x*x, n+1, x):
             sieve[y] = 1
         cnt = 0
         c = n
         while c:
           c  //= x
           cnt += c
-        
+
         pc[cnt].append(x)
 
     heap = []
@@ -186,32 +188,3 @@ def fact6_1(n, merging = min_pair_merging, merging_in_blocks = adjacent_pair_mer
 
     return merging( heap )
 
-
-
-import timeit
-def check(f, n, num_runs = 100):
-    t = timeit.timeit(lambda: f(n), number=num_runs) / num_runs
-    print("t =", t, "for val", n)
-
-from functools import partial
-
-from math import factorial
-
-a = 1000
-check(factorial, a)
-check(fact_recursive, a)                     # t = 0.11220435719000306  for val 20000
-
-check(fact_classic, a)                       # t = 0.10875383063999834  for val 20000
-check(fact_classic_1, a)                     # t = 0.01967309137000484  for val 20000
-
-check(fact3, a)                              # t = 0.02237139875000139  for val 20000
-check(fact3_1, a)                            # t = 0.02788334269000188  for val 20000
-
-check(partial(fact3_2, f=lambda x: x//2), a)   # t = 0.03036437675000343  for val 20000
-check(partial(fact3_2, f=lambda x: x), a)      # t = 0.04168494952000401  for val 20000
-check(partial(fact3_2, f=lambda x: 3*x//2), a) # t = 0.030536252680012695 for val 20000
-check(partial(fact3_2, f=lambda x: 2*x), a)    # t = 0.030665910860006987 for val 20000
-
-check(fact5, a)                              # t = 0.035707068629999415 for val 20000
-check(fact6, a)                              # t = 0.028582149750000098 for val 20000
-check(fact6_1, a)                            # t = 0.02037144067000554  for val 20000
