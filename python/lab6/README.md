@@ -55,3 +55,9 @@ def build_tree_iterative(h, r, f, g):
 ```py
 print( build_tree_recursive(...) == build_tree_iterative(...) ) #True
 ```
+
+
+
+
+### Результаты:
+![alt](graph.png)
