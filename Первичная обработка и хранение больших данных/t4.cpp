@@ -185,7 +185,7 @@ int main() {
     // Введите среднее арифметическое для параметра "Стоимость" полученного после обработки набора данных:
     sum = 0;
     for(auto [id, spec] : clearTable) sum += spec[1];
-    cout << "Avg WIDTH after restoring values: " << sum/L << endl;
+    cout << "Avg WIDTH after restoring values: " << fixed << sum/L << endl;
 
 
     
