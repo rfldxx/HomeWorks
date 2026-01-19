@@ -66,7 +66,6 @@ double updated_get_double(const auto& s, int& i) {
 // !!! вообще лучше было бы если в конце каждой строчке был delim, а не только '\n'
 #define need_del_last 1
 
-
 // захардкожено!
 pair<string, double> get() {
     char delim = ',';
@@ -131,5 +130,7 @@ int main() {
         sum += in2009;
     }
 
+    cout << "\nSUM: " << fixed << sum << endl;
+}
     cout << fixed << sum << endl;
 }
