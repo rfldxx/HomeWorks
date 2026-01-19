@@ -76,7 +76,7 @@
     ```
     </details>
 
-Ответ: 210776.2
+**Ответ:** 210776.2
 
 
 
@@ -200,7 +200,7 @@ select count(*) from
     (select distinct visitor_id from VISITOR where first_name = 'Борис') as ab
 ```
 
-Ответ: $450$.
+**Ответ:** $450$.
 
 
 ## Задание 6
@@ -213,7 +213,7 @@ select count(*) from
 select distinct museum_name from museum natural join hall natural join exhibit where author = 'Михаил Перхин'
 ```
 
-Ответ: Музей Фаберже.
+**Ответ:** Музей Фаберже.
 
 
 Введите количество произведений
@@ -221,7 +221,7 @@ select distinct museum_name from museum natural join hall natural join exhibit w
 select count(*) from 
 	(select distinct exhibit_id from museum natural join hall natural join exhibit where author = 'Михаил Перхин' ) as ab
 ```
-Ответ: $5$.
+**Ответ:** $5$.
 
 ## Задача 7
 В базе данных хранятся сведения о произведениях некоторых авторов из нескольких музеев Санкт-Петербурга. Укажите название самого раннего произведения (из упомянутых в базе) автора `Генрик Вигстрём`?
@@ -238,7 +238,7 @@ LIMIT 1
 
 (онако если посмотртеть все результаты то там окажется одно произведение с `year_of_creation is NULL`)
 
-Ответ: Флакон парфюмерный с крышкой в виде женской головки.
+**Ответ:** Флакон парфюмерный с крышкой в виде женской головки.
 
 ## Задача 8
 
@@ -258,5 +258,5 @@ FROM   schedule natural join visitor_schedule
 WHERE  excursion_id = 25 and '2023-04-01 00:00' <= starts_on and starts_on < '2023-05-01 00:00'
 ```
 
-Ответ: $1867$.
+**Ответ:** $1867$.
 
