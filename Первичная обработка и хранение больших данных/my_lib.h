@@ -67,7 +67,8 @@ double updated_get_double(const auto& s, int& i) {
 // ======================================================================================================
 // Quantiles
 // медиана отсортированного подмассива [l, r]
-double median(const vector<double>& xx, int l, int r) {
+double median(const vector<double>& xx, int l, int r) { // <- зачем я так сделал!? 
+                                                        // лучше была бы функция, возвращающая индекс медианого значения
     int n = r-l+1;
     // нечётное количество
     if( n%2 ) return xx[l + n/2];
