@@ -1,31 +1,41 @@
 <!DOCTYPE html>
 <html>
- <head>
-  <title>Страница HTML5</title><meta charset="utf-8">
- </head>
- <body>
-   <h4>rfldxx</h4>
-      
-    <article id="ARTICLE">
-      
-    </article>
+  <head>
+    <title></title>
+  </head>
+  <body>
+    <h4>rfldxx</h4>
+    <script>
+      let str = window.location.search.substring(1);
 
-    <button id="bt" onclick="
-    const article = document.createElement('article');
-    article.id = 'ARTICLE';
-    document.body.appendChild(article);  
-                             
-    for(let i = 0; i < 1000; i++) {
-           const newEl = document.createElement('div');
-            
-            newEl.id = 'i' + i;
-            
-            newEl.textContent = 'id: ' + newEl.id;
-            
-            article.appendChild(newEl);   
-     }
-                             
-    ">Выполнить задие</button>    
-  
- </body>
+      let ABstr = str.substring(0, str.length).split('&');
+      let AB = [];
+      for (let s of ABstr) AB.push(s.substring(2, s.length).split(','));
+
+      let means = []; // = (sum_i x_i) / n
+      let ddd = []; // = sum_i (x_i - x_mean)^2 = sum_i (x_i^2)  -  (sum_i x_i)^2 / n
+      for (let arr of AB) {
+        let sum_e = 0,
+          sum_e2 = 0;
+        for (let e of arr) {
+          let a = Number(e);
+          sum_e += a;
+          sum_e2 += a * a;
+        }
+        means.push(sum_e / arr.length);
+        ddd.push(sum_e2 - (sum_e * sum_e) / arr.length);
+      }
+
+      // подсчёт коэф. Пирсона:
+      let r = 0;
+      for (let i in AB[0]) r += (AB[0][i] - means[0]) * (AB[1][i] - means[1]);
+      r /= Math.sqrt(ddd[0] * ddd[1]);
+
+      // форматирование
+      let ans = Math.trunc(1000 * Math.abs(r));
+      result_str = ans == 1000 ? '1' : '0.' + ans;
+      console.log(result_str);
+      document.title = result_str;
+    </script>
+  </body>
 </html>
