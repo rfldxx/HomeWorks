@@ -10,31 +10,30 @@
 
       let ABstr = str.substring(0, str.length).split('&');
       let AB = [];
-      for (let s of ABstr) AB.push(s.substring(2, s.length).split(','));
+      for(let s of ABstr) AB.push(s.substring(2, s.length).split(','));
 
-      let means = []; // = (sum_i x_i) / n
-      let ddd = []; // = sum_i (x_i - x_mean)^2 = sum_i (x_i^2)  -  (sum_i x_i)^2 / n
-      for (let arr of AB) {
-        let sum_e = 0,
-          sum_e2 = 0;
-        for (let e of arr) {
+      let means = [];  // = (sum_i x_i) / n
+      let ddd   = [];  // = sum_i (x_i - x_mean)^2 = sum_i (x_i^2)  -  (sum_i x_i)^2 / n
+      for(let arr of AB) {
+        let sum_e = 0, sum_e2 = 0;
+        for(let e of arr) {
           let a = Number(e);
-          sum_e += a;
-          sum_e2 += a * a;
+          sum_e  += a;
+          sum_e2 += a*a;
         }
-        means.push(sum_e / arr.length);
-        ddd.push(sum_e2 - (sum_e * sum_e) / arr.length);
+        means.push(sum_e/arr.length);
+        ddd  .push(sum_e2 - sum_e*sum_e/arr.length);
       }
 
       // подсчёт коэф. Пирсона:
       let r = 0;
-      for (let i in AB[0]) r += (AB[0][i] - means[0]) * (AB[1][i] - means[1]);
+      for(let i in AB[0]) r += (AB[0][i] - means[0]) * (AB[1][i] - means[1]);
       r /= Math.sqrt(ddd[0] * ddd[1]);
 
       // форматирование
       let ans = Math.trunc(1000 * Math.abs(r));
       result_str = ans == 1000 ? '1' : '0.' + ans;
-      console.log(result_str);
+      // console.log(result_str);
       document.title = result_str;
     </script>
   </body>
