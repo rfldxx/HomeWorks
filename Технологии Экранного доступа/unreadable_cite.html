@@ -236,7 +236,7 @@ function enter_cursor() {
     
     // следующий символ не вмещается
     if( y_cursor + Hsymb > offscreen_canvas.height ) {
-        offscreen_canvas = resizeOffscreenCanvas(offscreen_canvas, offscreen_canvas.width, y_cursor + Hsymb);
+        offscreen_canvas = resizeOffscreenCanvas(offscreen_canvas, offscreen_canvas.width, 2 * offscreen_canvas.height);
         offscreen_ctx = offscreen_canvas.getContext('2d');
     }
 }
