@@ -25,10 +25,11 @@ let cite = {
             page_id: 0,
             content: "Привет! Это сайт на canvas.\n" +
                      "Вы можете посетить:\n" +
-                     " * [[главную страницу](0)] (правда вы уже на ней)\n" +
+                     " * [[главную страницу](0)]\n" +
                      " * [[страницу с кучей символов](1)]<<<\n" +
                      " * [[сгененированный текст](2)] (нет фантазии)\n" +
-                     " * [[а так же не существующую страницу](153)]\n"
+                     " * [[а также на не существующую страницу](153)]\n" +
+                     "проверка что не отображается дополнительная строчка в конце..........."
         },
         {
             page_id: 1,
@@ -46,7 +47,7 @@ let cite = {
                      "фывапролджэ\n" +
                      "ячсмитьбю\n" +
                      "\n" +
-                     "[[Оочень много (рандомного) текста](3)]"
+                     "[[Оочень много (рандомного) текста...](3)]"
         },
         {
             page_id: 3,
@@ -153,19 +154,18 @@ let up_offset = 50, down_offset = 50;
 // РЕНДЕРИНГ ВСЕЙ СТРАНИЦЫ (на OffscreenCanvas)
 let offscreen_canvas;
 let offscreen_ctx;
+let offscreen_usingH = 0;
 
 // как грустно, но такой функции нет
 function resizeOffscreenCanvas(cnv, new_w, new_h) {
     const new_cnv = new OffscreenCanvas(new_w, new_h);
-    
-    // Копируем содержимое старого холста
-    new_cnv.getContext('2d').drawImage(cnv, 0, 0, Math.min(cnv.width, new_w), Math.min(cnv.height, new_h));
-    
+    new_cnv.getContext('2d').drawImage(cnv, 0, 0);  // Копируем содержимое старого холста
     return new_cnv;
 }
 
 // места куда печатается (размещаются) символы
 let x_cursor = 0, y_cursor = 0;
+let is_first_on_line = true;
 
 // координаты каждого символа ссылки (лень прям в прямоугольники выделять их)
 let offscreen_links_position = [];
@@ -182,6 +182,7 @@ function render_page(indx) {
     offscreen_links_position = [];
     x_cursor = 0;
     y_cursor = 0;
+    is_first_on_line = true;
 
     let str = pages[indx].content;
     let links_segments = links[indx];
@@ -197,21 +198,27 @@ function render_page(indx) {
         let to_indx = page_id_to_indx.has(to_page) ? page_id_to_indx.get(to_page) : -1;
         let clr     = page_id_to_indx.has(to_page) ? 'blue' : 'red';
         while( i < links_segments[p].end_pos ) {
-            offscreen_links_position.push( {x: x_cursor, y: y_cursor, to: to_indx} );
             print_symbol(str[i++], clr);
+            offscreen_links_position.push( {x: x_cursor, y: y_cursor, to: to_indx} );
         }
         p++;
     }
-    console.log("link printed: ", p);
-    console.log('what!!!!!!');
+    
+    // Делаем размер виртуального canvas ровненько под размер содержимого
+    offscreen_canvas = resizeOffscreenCanvas(offscreen_canvas, offscreen_canvas.width, y_cursor + Hsymb);
+
+    console.log(`end render! (links founded: ${p})`);
 }
 
 function print_symbol(c, clr = 'black', draw_box = DRAW_SYMBOL_BORDER) {
     if( c == '\n' ) { enter_cursor(); return; }  // а можно?: return enter_cursor();
+    
+    move_cursor();
+    is_first_on_line = false;
 
     // Печать символа
     offscreen_ctx.font         = 'bold 24px Arial';
-    offscreen_ctx.fillStyle    = clr; // цвет заливки
+    offscreen_ctx.fillStyle    =  clr; // цвет заливки
     offscreen_ctx.textAlign    = 'center';
     offscreen_ctx.textBaseline = 'middle';
     offscreen_ctx.fillText(c, x_cursor + Wsymb/2, y_cursor + Hsymb/2);
@@ -220,17 +227,18 @@ function print_symbol(c, clr = 'black', draw_box = DRAW_SYMBOL_BORDER) {
         offscreen_ctx.strokeStyle = clr; // цвет рамки
         offscreen_ctx.strokeRect(x_cursor, y_cursor, Wsymb, Hsymb);
     }
-
-    move_cursor();
 }
 
 function move_cursor() {
+    if( is_first_on_line ) { is_first_on_line = false; return; }
+
     x_cursor += Wsymb;
     // следующий символ не вмещается
     if( x_cursor + Wsymb > offscreen_canvas.width ) enter_cursor();
 }
 
 function enter_cursor() {
+    is_first_on_line = true;
     x_cursor  = 0;
     y_cursor += Hsymb;
     
