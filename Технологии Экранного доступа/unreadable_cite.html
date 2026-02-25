@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>сайт на canvas</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <label>
+    Показывать рамки ограничивающие символы <input type="checkbox" id="myCheckbox" checked> 
+    </label>
+
+<script>
+
+let cite = {
+    pages: [
+        {
+            page_id: 0,
+            content: "Привет! Это сайт на canvas.\n" +
+                     "Вы можете посетить:\n" +
+                     " * [[главную страницу](0)] (правда вы уже на ней)\n" +
+                     " * [[страницу с кучей символов](1)]<<<\n" +
+                     " * [[сгененированный текст](2)] (нет фантазии)\n" +
+                     " * [[а так же не существующую страницу](153)]\n"
+        },
+        {
+            page_id: 1,
+            content: "[[НА ГЛАВНУЮ](0)]\n" +
+                     "ЦИФРЫ:\n" +
+                     "01234567890\n" +
+                     "\n" +
+                     "АНГЛИЙСКАЯ РАСКЛАДКА:\n" +
+                     "qwertyuiop\n" +
+                     "asdfghjkl\n" +
+                     "zxcvbnm\n" +
+                     "\n" +
+                     "РУССКАЯ РАСКЛАДКА:\n" +
+                     "йцукенгшщзхъ\n" +
+                     "фывапролджэ\n" +
+                     "ячсмитьбю\n" +
+                     "\n" +
+                     "[[Оочень много (рандомного) текста](3)]"
+        },
+        {
+            page_id: 3,
+            content: "[[НА ГЛАВНУЮ](0)]\n" +
+                     "один два три четыре пять шесть семь восемь девять десять одиннадцать двенадцать тринадцать четырнадцать пятнадцать шестнадцать семнадцать восемнадцать девятнадцать двадцать двадцать один двадцать два двадцать три двадцать четыре двадцать пять двадцать шесть двадцать семь двадцать восемь двадцать девять тридцать тридцать один тридцать два тридцать три тридцать четыре тридцать пять тридцать шесть тридцать семь тридцать восемь тридцать девять сорок сорок один сорок два сорок три сорок четыре сорок пять сорок шесть сорок семь сорок восемь сорок девять пятьдесят" +
+                     "пятьдесят один пятьдесят два пятьдесят три пятьдесят четыре пятьдесят пять пятьдесят шесть пятьдесят семь пятьдесят восемь пятьдесят девять шестьдесят шестьдесят один шестьдесят два шестьдесят три шестьдесят четыре шестьдесят пять шестьдесят шесть шестьдесят семь шестьдесят восемь шестьдесят девять семьдесят семьдесят один семьдесят два семьдесят три семьдесят четыре семьдесят пять семьдесят шесть семьдесят семь семьдесят восемь семьдесят девять восемьдесят восемьдесят один восемьдесят два восемьдесят три восемьдесят четыре восемьдесят пять восемьдесят шесть восемьдесят семь восемьдесят восемь восемьдесят девять девяносто девяносто один девяносто два девяносто три девяносто четыре девяносто пять девяносто шесть девяносто семь девяносто восемь девяносто девять сто" +
+                     "\n[[НА ГЛАВНУЮ](0)]" 
+        },
+        {
+            page_id: 2,
+            content: "[[НА ГЛАВНУЮ](0)]\n" +
+                     "ура это не сгенерированные страницы! Вы можете посетить [[пасхальную страницу](999)]!"
+                     
+        },
+        {
+            page_id: 999,
+            content: "[[НА ГЛАВНУЮ](0)]\n" +
+                     "[[НАЗАД](2)]\n" +
+                     "К сожалению кнопка \"назад\" захардкожена на только одну определённую страницу, а не на ту, из который вы пришли."
+                     
+        },
+    ]
+};
+
+
+
+// ================================================================================================
+// ДАЛЬШЕ ИДЁТ КОД
+// ================================================================================================
+
+let DRAW_SYMBOL_BORDER = document.getElementById('myCheckbox').checked;
+
+let pages = cite.pages;
+
+
+// ================================================================================================
+// НАХОДИМ ВСЕ ССЫЛКИ НА КАЖДОЙ СТРАНИЦЕ
+let links = [];
+for(let indx in pages) {
+    links.push([]);
+
+    let str = pages[indx].content;
+    let new_str = "";  // ЛОЛ, оказывается строки в js не изменяемые и даже при '+=' создается новая строка, поэтому лучше переписать new_str через массивы, ведь они изменяемые (что за бред зачем так делать!??!?!?)
+    for(let i = 0; i < str.length; i++) {
+        new_str += str[i];  // эхх, в js нет goto, поэтому тут всегда push_back-аем символ, хоть не всегда это надо
+
+        // проверка наличия: "[["
+        if( !(i+1 < str.length) || (str[i] != '[') || (str[i+1] != '[') ) continue;
+        
+        // считывание "текста" ссылки
+        let j = i+2;
+        let link_txt = "";
+        while( j < str.length && str[j] != ']' ) link_txt += str[j++];
+        
+        // проверка наличия: "]("
+        if( !(j+1 < str.length) || (str[j] != ']') || (str[j+1] != '(') ) continue;
+        j += 2;
+
+        // считывание "указателя" ссылки
+        let number = 0;
+        while( j < str.length && '0' <= str[j] && str[j] <= '9' ) number = 10*number + (str[j++] - '0');
+
+        // проверка наличия: ")]"
+        if( !(j+1 < str.length) || (str[j] != ')') || (str[j+1] != ']') ) continue;
+        i = j+1;
+
+        // это ссылка!
+        console.log(`  - LINK: "${link_txt}" to: ${number}`);
+        new_str       = new_str.slice(0, -1);  // удаление последнего символа (который является: '[')
+        let start_pos = new_str.length;
+        new_str      += link_txt;
+        let end_pos   = new_str.length;
+        links[indx].push( {start_pos: start_pos, end_pos: end_pos, to: number} );
+    }
+
+    pages[indx].content = new_str;
+    console.log(`page in indx ${indx} (total links: ${links[indx].length}): ${pages[indx].content}`);
+}
+
+// соотношение page_id к индексу в массиве pages
+let page_id_to_indx = new Map();
+for(let indx in pages) {
+    page_id_to_indx.set(pages[indx].page_id, indx);
+}
+
+
+
+// ================================================================================================
+// параметры CANVAS
+let canvas = document.getElementById("canvas");
+let ctx    = canvas  .getContext('2d');
+
+
+// параметры ТЕКСТА на странице
+// размер "предоставляемый" на один символ:
+let Wsymb = 20, Hsymb = 50;
+
+let left_offset = 50, right_offset = 50;
+let up_offset = 50, down_offset = 50;
+
+
+
+// ================================================================================================
+// РЕНДЕРИНГ ВСЕЙ СТРАНИЦЫ (на OffscreenCanvas)
+let offscreen_canvas;
+let offscreen_ctx;
+
+// как грустно, но такой функции нет
+function resizeOffscreenCanvas(cnv, new_w, new_h) {
+    const new_cnv = new OffscreenCanvas(new_w, new_h);
+    
+    // Копируем содержимое старого холста
+    new_cnv.getContext('2d').drawImage(cnv, 0, 0, Math.min(cnv.width, new_w), Math.min(cnv.height, new_h));
+    
+    return new_cnv;
+}
+
+// места куда печатается (размещаются) символы
+let x_cursor = 0, y_cursor = 0;
+
+// координаты каждого символа ссылки (лень прям в прямоугольники выделять их)
+let offscreen_links_position = [];
+
+let curr_page_indx = 0;
+function render_page(indx) {
+    curr_page_indx = indx;
+    // ширина текста
+    let Wtext = canvas.width - left_offset - right_offset;
+
+    offscreen_canvas = new OffscreenCanvas(Wtext, Hsymb);
+    offscreen_ctx = offscreen_canvas.getContext('2d');
+    
+    offscreen_links_position = [];
+    x_cursor = 0;
+    y_cursor = 0;
+
+    let str = pages[indx].content;
+    let links_segments = links[indx];
+    let p = 0;
+    for(let i = 0; i < str.length; ) {
+        if( p >= links_segments.length || i != links_segments[p].start_pos ) {
+            print_symbol(str[i++]);
+            continue;
+        }
+        
+        // индекс находится в зоне ссылки!
+        let to_page = links_segments[p].to;
+        let to_indx = page_id_to_indx.has(to_page) ? page_id_to_indx.get(to_page) : -1;
+        let clr     = page_id_to_indx.has(to_page) ? 'blue' : 'red';
+        while( i < links_segments[p].end_pos ) {
+            offscreen_links_position.push( {x: x_cursor, y: y_cursor, to: to_indx} );
+            print_symbol(str[i++], clr);
+        }
+        p++;
+    }
+    console.log("link printed: ", p);
+    console.log('what!!!!!!');
+}
+
+function print_symbol(c, clr = 'black', draw_box = DRAW_SYMBOL_BORDER) {
+    if( c == '\n' ) { enter_cursor(); return; }  // а можно?: return enter_cursor();
+
+    // Печать символа
+    offscreen_ctx.font         = 'bold 24px Arial';
+    offscreen_ctx.fillStyle    = clr; // цвет заливки
+    offscreen_ctx.textAlign    = 'center';
+    offscreen_ctx.textBaseline = 'middle';
+    offscreen_ctx.fillText(c, x_cursor + Wsymb/2, y_cursor + Hsymb/2);
+
+    if( draw_box ) {
+        offscreen_ctx.strokeStyle = clr; // цвет рамки
+        offscreen_ctx.strokeRect(x_cursor, y_cursor, Wsymb, Hsymb);
+    }
+
+    move_cursor();
+}
+
+function move_cursor() {
+    x_cursor += Wsymb;
+    // следующий символ не вмещается
+    if( x_cursor + Wsymb > offscreen_canvas.width ) enter_cursor();
+}
+
+function enter_cursor() {
+    x_cursor  = 0;
+    y_cursor += Hsymb;
+    
+    // следующий символ не вмещается
+    if( y_cursor + Hsymb > offscreen_canvas.height ) {
+        offscreen_canvas = resizeOffscreenCanvas(offscreen_canvas, offscreen_canvas.width, y_cursor + Hsymb);
+        offscreen_ctx = offscreen_canvas.getContext('2d');
+    }
+}
+
+
+
+// ================================================================================================
+// ОТРИСОВКА СТРАНИЦЫ (копирование из OffscreenCanvas на основной canvas)
+
+// на сколько сдвинута страница от первоначального состояния (например из-за колесика мыши)
+let Yshift = 0;
+let maxYshift = 0, minYshift = 0;
+
+// так-то x координата не меняется, но чтобы далее в коде не зависеть от переменной left_offset
+let Xshift = left_offset; 
+
+function redraw_page() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(offscreen_canvas, Xshift, Yshift);
+}
+
+function reset_drawing_settings() {
+    Yshift    = up_offset;
+    maxYshift = up_offset;
+    minYshift = Math.min(maxYshift, canvas.height - offscreen_canvas.height - down_offset);
+}
+
+// ПОКАЗЫВАНИЕ РАМОК ВОКРУГ СИМВОЛОВ (пока по-кривому - перерендериваем всю страницу) (а можно было создать два cnavas - один на символы, втроой - на рамки)
+document.getElementById('myCheckbox').addEventListener('change', (event) => {
+    DRAW_SYMBOL_BORDER = event.target.checked;
+    render_page(curr_page_indx);
+    redraw_page()
+});
+
+
+// НЧАЛЬНАЯ ОТРИСОВКА СТРАНИЦЫ
+render_page(0);
+reset_drawing_settings();
+redraw_page();
+
+
+
+// ================================================================================================
+// УЧЁТ ПОЗИЦИИ МЫШКИ
+let coveredLink = -1;
+function isLinkCovered(x_mouse, y_mouse) {
+    for(let {x, y, to} of offscreen_links_position) {
+        let real_x = x + Xshift, real_y = y + Yshift;  // <- ТУТ учёт сдвига страницы
+        if( real_x <= x_mouse && x_mouse <= real_x + Wsymb && real_y <= y_mouse && y_mouse <= real_y + Hsymb ) {
+            return coveredLink = to;
+        }
+    }
+    return coveredLink = -2;
+}
+
+canvas.addEventListener('mousemove', (event) => {
+    // получение координат мышин а canvas
+    const rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left, y = event.clientY - rect.top;
+
+    isLinkCovered(x, y);
+    if( coveredLink != -2 ) console.log('covered: ', coveredLink);
+
+    // Подсветка вершин при наведении
+    canvas.style.cursor = (coveredLink != -2) ? 'pointer' : 'default';
+});
+
+
+let pre_select = -1;
+canvas.addEventListener('mousedown', (event) => {
+    if( event.button == 0 ) { // ЛКМ
+        pre_select = coveredLink;
+    }
+});
+
+// !!! НА ЦЕЛЫЙ ДОКУМЕНТ
+document.addEventListener('mouseup', (event) => {
+    // если не ЛКМ - то выход
+    if( event.button != 0 ) return;
+
+    if( coveredLink != pre_select || coveredLink < 0 ) return;
+    
+    // перерисовываем страницу
+    render_page(coveredLink);
+    reset_drawing_settings();
+    redraw_page();
+});
+
+
+
+// ================================================================================================
+// ВЕРТИКАЛЬНОЕ ДВИЖЕНИЕ СТРАНИЦЫ (с помощью стрелки вверх/вниз или колесика мышки)
+function move_y(dy = 30) {
+    if( dy == 0 ) return;
+
+    Yshift += dy;
+    if( dy > 0 ) Yshift = Math.min(maxYshift, Yshift);
+    else         Yshift = Math.max(minYshift, Yshift);
+    redraw_page();
+}
+
+// !!! НА ЦЕЛЫЙ ДОКУМЕНТ
+// движение стрелками
+document.addEventListener('keydown', (event) => {
+    if( event.key == 'ArrowUp'   ) move_y(+30);
+    if( event.key == 'ArrowDown' ) move_y(-30);
+});
+
+// движение колесиком мышки
+canvas.addEventListener('wheel', (event) => {
+    const sensitivity = 0.5;
+    move_y( - sensitivity * event.deltaY );
+    console.log('wheel move: ', event.deltaY);
+});
+
+</script>
+</body>
+</html>
