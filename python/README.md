@@ -74,6 +74,10 @@ for a, b in itertools.product(A, B):
 Callable[[int], bool]
 ```
 
+Запуск тестов в Google Colab:
+```py
+unittest.main(argv=[''], verbosity=2, exit=False)
+```
 
 
 ## Lab3&5. "Построение бинарного дерева"
