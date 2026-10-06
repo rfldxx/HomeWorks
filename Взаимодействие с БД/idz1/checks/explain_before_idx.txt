@@ -1,0 +1,118 @@
+-- 1. Создание заказа
+CTE Scan on new_order (cost=21.45..21.47 rows=1 width=4) (actual time=0.800..0.800 rows=1 loops=1)
+CTE query
+-> Result (cost=0.00..0.01 rows=1 width=136) (actual time=0.100..0.100 rows=1 loops=1)
+CTE locked_prices
+-> LockRows (cost=0.59..21.14 rows=3 width=114) (actual time=0.400..0.400 rows=2 loops=1)
+-> Nested Loop (cost=0.59..21.11 rows=3 width=114) (actual time=0.400..0.400 rows=2 loops=1)
+-> Subquery Scan on query_agregated (cost=0.44..0.59 rows=3 width=104) (actual time=0.400..0.400 rows=2 loops=1)
+-> HashAggregate (cost=0.44..0.56 rows=3 width=40) (actual time=0.300..0.300 rows=2 loops=1)
+Group Key: TRIM(BOTH FROM (unnest(string_to_array(query.product_names, ','::text))))
+Filter: (sum(((TRIM(BOTH FROM (unnest(string_to_array(query.product_quantities, ','::text)))))::integer)) > 0)
+Batches: 1 Memory Usage: 24kB
+Rows Removed by Filter: 1
+-> Result (cost=0.00..0.39 rows=10 width=36) (actual time=0.100..0.200 rows=4 loops=1)
+-> ProjectSet (cost=0.00..0.08 rows=10 width=64) (actual time=0.100..0.200 rows=4 loops=1)
+-> CTE Scan on query (cost=0.00..0.02 rows=1 width=64) (actual time=0.000..0.100 rows=1 loops=1)
+-> Index Scan using products_pkey on products (cost=0.15..6.84 rows=1 width=42) (actual time=0.000..0.000 rows=1 loops=2)
+Index Cond: (product_name = query_agregated.product_name)
+CTE new_order
+-> Insert on orders (cost=0.08..0.12 rows=1 width=44) (actual time=0.800..0.800 rows=1 loops=1)
+-> Nested Loop (cost=0.08..0.12 rows=1 width=44) (actual time=0.800..0.800 rows=1 loops=1)
+-> CTE Scan on query query_1 (cost=0.00..0.02 rows=1 width=36) (actual time=0.100..0.100 rows=1 loops=1)
+-> Aggregate (cost=0.08..0.09 rows=1 width=32) (actual time=0.600..0.600 rows=1 loops=1)
+-> CTE Scan on locked_prices (cost=0.00..0.06 rows=3 width=12) (actual time=0.400..0.400 rows=2 loops=1)
+CTE new_order_phase
+-> Insert on order_phases (cost=0.00..0.05 rows=0 width=0) (actual time=0.000..0.000 rows=0 loops=1)
+-> Nested Loop (cost=0.00..0.05 rows=1 width=40) (actual time=0.000..0.000 rows=1 loops=1)
+-> CTE Scan on new_order new_order_1 (cost=0.00..0.02 rows=1 width=4) (actual time=0.000..0.000 rows=1 loops=1)
+-> CTE Scan on query query_2 (cost=0.00..0.02 rows=1 width=36) (actual time=0.000..0.000 rows=1 loops=1)
+CTE new_order_items
+-> Insert on order_items (cost=0.00..0.12 rows=0 width=0) (actual time=0.000..0.000 rows=0 loops=1)
+-> Nested Loop (cost=0.00..0.12 rows=3 width=40) (actual time=0.000..0.000 rows=2 loops=1)
+-> CTE Scan on new_order new_order_2 (cost=0.00..0.02 rows=1 width=4) (actual time=0.000..0.000 rows=1 loops=1)
+-> CTE Scan on locked_prices locked_prices_1 (cost=0.00..0.06 rows=3 width=40) (actual time=0.000..0.000 rows=2 loops=1)
+Planning Time: 0.700 ms
+Trigger for constraint orders_customer_id_fkey on orders: time=0.100 calls=1
+Trigger for constraint order_phases_order_id_fkey on order_phases: time=0.000 calls=1
+Trigger for constraint order_items_order_id_fkey on order_items: time=0.000 calls=2
+Trigger for constraint order_items_product_name_fkey on order_items: time=0.000 calls=2
+Execution Time: 1.200 ms
+
+
+---------------------------------------------------------------------------------------------------
+-- 2. Обновление статуса
+Update on order_phases (cost=0.28..8.30 rows=0 width=0) (actual time=0.400..0.400 rows=0 loops=1)
+-> Index Scan using order_phases_pkey on order_phases (cost=0.28..8.30 rows=1 width=38) (actual time=0.000..0.000 rows=1 loops=1)
+Index Cond: ((order_id = 2086) AND (status = 'booked'::text))
+Planning Time: 0.100 ms
+Execution Time: 0.600 ms
+
+
+---------------------------------------------------------------------------------------------------
+-- 3. Получение заказа
+Nested Loop (cost=23.27..110.70 rows=16 width=216) (actual time=0.200..0.200 rows=4 loops=1)
+-> Nested Loop (cost=23.12..63.97 rows=16 width=212) (actual time=0.200..0.200 rows=4 loops=1)
+-> Nested Loop (cost=18.71..34.78 rows=1 width=176) (actual time=0.100..0.100 rows=1 loops=1)
+-> Nested Loop (cost=18.44..26.47 rows=1 width=80) (actual time=0.100..0.100 rows=1 loops=1)
+-> Index Scan using orders_pkey on orders (cost=0.28..8.29 rows=1 width=44) (actual time=0.000..0.000 rows=1 loops=1)
+Index Cond: (order_id = 333)
+-> Limit (cost=18.16..18.16 rows=1 width=36) (actual time=0.100..0.100 rows=1 loops=1)
+-> Sort (cost=18.16..18.18 rows=9 width=36) (actual time=0.100..0.100 rows=1 loops=1)
+Sort Key: order_phases.order_date DESC
+Sort Method: quicksort Memory: 17kB
+-> Bitmap Heap Scan on order_phases (cost=4.35..18.11 rows=9 width=36) (actual time=0.100..0.100 rows=2 loops=1)
+Recheck Cond: (order_id = orders.order_id)
+Heap Blocks: exact=1
+-> Bitmap Index Scan on order_phases_pkey (cost=0.00..4.34 rows=9 width=0) (actual time=0.100..0.100 rows=2 loops=1)
+Index Cond: (order_id = orders.order_id)
+-> Index Scan using customers_pkey on customers (cost=0.28..8.29 rows=1 width=100) (actual time=0.000..0.000 rows=1 loops=1)
+Index Cond: (customer_id = orders.customer_id)
+-> Bitmap Heap Scan on order_items (cost=4.40..29.03 rows=16 width=40) (actual time=0.100..0.100 rows=4 loops=1)
+Recheck Cond: (order_id = 333)
+Heap Blocks: exact=1
+-> Bitmap Index Scan on order_items_pkey (cost=0.00..4.40 rows=16 width=0) (actual time=0.100..0.100 rows=4 loops=1)
+Index Cond: (order_id = 333)
+-> Index Scan using products_pkey on products (cost=0.15..2.92 rows=1 width=36) (actual time=0.000..0.000 rows=1 loops=4)
+Index Cond: (product_name = order_items.product_name)
+Planning Time: 0.600 ms
+Execution Time: 0.200 ms
+
+
+---------------------------------------------------------------------------------------------------
+-- 4. Отчёт "топ-10 товаров"
+Limit (cost=30784.72..30784.75 rows=10 width=48) (actual time=7.700..7.700 rows=10 loops=1)
+-> Sort (cost=30784.72..30785.22 rows=200 width=48) (actual time=7.700..7.700 rows=10 loops=1)
+Sort Key: (sum((order_items.product_quantity * products.product_price))) DESC
+Sort Method: quicksort Memory: 18kB
+-> GroupAggregate (cost=0.43..30780.40 rows=200 width=48) (actual time=0.900..7.500 rows=14 loops=1)
+Group Key: order_items.product_name
+-> Nested Loop (cost=0.43..30747.20 rows=3120 width=40) (actual time=0.100..5.800 rows=2950 loops=1)
+-> Index Scan using products_pkey on products (cost=0.15..67.20 rows=1270 width=36) (actual time=0.100..0.100 rows=14 loops=1)
+-> Index Scan using order_items_pkey on order_items (cost=0.28..24.00 rows=16 width=36) (actual time=0.029..0.257 rows=211 loops=14)
+Index Cond: (product_name = products.product_name)
+Planning Time: 0.100 ms
+Execution Time: 7.700 ms
+
+
+---------------------------------------------------------------------------------------------------
+-- 5. Поиск клиента
+-- по customer_id:
+Index Scan using customers_pkey on customers (cost=0.28..8.29 rows=1 width=100) (actual time=0.000..0.000 rows=1 loops=1)
+Index Cond: (customer_id = 444)
+Planning Time: 0.100 ms
+Execution Time: 0.000 ms
+
+-- по customer_email = 'rena1975@gmail.com':
+Seq Scan on customers (cost=10000000000.00..10000000017.88 rows=3 width=100) (actual time=0.200..0.200 rows=1 loops=1)
+Filter: (customer_email = 'rena1975@gmail.com'::text)
+Rows Removed by Filter: 499
+Planning Time: 0.000 ms
+Execution Time: 0.200 ms
+
+-- по customer_email LIKE '%rena%':
+Seq Scan on customers (cost=10000000000.00..10000000017.88 rows=5 width=100) (actual time=0.100..0.200 rows=3 loops=1)
+Filter: (customer_email ~~ '%rena%'::text)
+Rows Removed by Filter: 497
+Planning Time: 0.300 ms
+Execution Time: 0.200 ms
